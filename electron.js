@@ -1,6 +1,8 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
-const fs = require('fs-extra')
+const fs = require('fs-extra');
+const chardet = require('chardet');
+const iconv = require('iconv-lite');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -30,6 +32,7 @@ app.on('activate', () => {
   }
 });
 
+// 处理打开文件事件
 ipcMain.handle('open-file', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
         properties: ['openFile'],
@@ -39,7 +42,10 @@ ipcMain.handle('open-file', async () => {
         return {canceled: true}
     } else {
         const filePath = filePaths[0];
-        const content = await fs.readFile(filePath, 'utf-8');
+        const encoding = chardet.detectFileSync(filePath); // 检测文件的实际编码
+        const buffer = fs.readFileSync(filePath);
+        const content = iconv.decode(buffer, encoding); // 用正确的编码读取文件内容，从而避免出现乱码问题
+
         return {canceled: false, content, filePath}
     }
 })
