@@ -4,6 +4,14 @@ const fs = require('fs-extra');
 const chardet = require('chardet');
 const iconv = require('iconv-lite');
 
+// const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
+
+// 引入 electron-reload
+require('electron-reload')(__dirname, {
+    electron: require(`${__dirname}/node_modules/electron`),
+    ignored: /node_modules|[/\\]\./
+  });
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 800,
@@ -16,9 +24,18 @@ function createWindow() {
   });
 
   win.loadURL('http://localhost:3000'); // React 应用的地址
+  
+  win.webContents.openDevTools(); // 打开开发者工具
 }
 
-app.on('ready', createWindow);
+app.on('ready', async () => {
+    try {
+        // await installExtension(REACT_DEVELOPER_TOOLS); // 使用react调试工具
+        createWindow();
+    } catch(err) {
+        console.error('Failed to install React DevTools: ', err)
+    }
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
