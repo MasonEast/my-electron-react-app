@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs-extra')
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -7,6 +8,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'), // 可选的预加载脚本
+      nodeIntegration: true,
+      contextIsolation: false
     },
   });
 
@@ -26,3 +29,17 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+ipcMain.handle('open-file', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{ name: 'Text files', extensions: ['txt', 'md'] }]
+    })
+    if(canceled){
+        return {canceled: true}
+    } else {
+        const filePath = filePaths[0];
+        const content = await fs.readFile(filePath, 'utf-8');
+        return {canceled: false, content, filePath}
+    }
+})
