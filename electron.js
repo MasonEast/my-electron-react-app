@@ -4,6 +4,7 @@ const fs = require('fs-extra');
 const chardet = require('chardet');
 const iconv = require('iconv-lite');
 
+
 // const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
 
 // 引入 electron-reload
